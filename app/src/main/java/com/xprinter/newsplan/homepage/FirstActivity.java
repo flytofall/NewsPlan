@@ -1,8 +1,10 @@
 package com.xprinter.newsplan.homepage;
 
+import android.app.Fragment;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -14,35 +16,84 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.xprinter.newsplan.R;
+import com.xprinter.newsplan.bookmarks.BookmarkFragment;
 
 public class FirstActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private MainFragment mainFragment;
+    private BookmarkFragment bookmarkFragment;
+    private NavigationView navigationView;
+    private DrawerLayout drawer;
+    private Toolbar toolbar;
+
+    public static final String ACTION_BOOKMARKS = "com.charlie.zhihudaily.bookmarks";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_first);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        //初始化view、
+        initView();
+
+
+
+    }
+
+    private void initView(){
+        toolbar= (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer= (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle=new ActionBarDrawerToggle(
+                this,
+                drawer,
+                toolbar,
+                R.string.navigation_drawer_open,
+                R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView= (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
     }
+    //显示主fragment
+    private void showMainFragment(){
+        FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
+        transaction.show(mainFragment);
+        transaction.hide(bookmarkFragment);
+        transaction.commit();
+
+        toolbar.setTitle(getResources().getString(R.string.app_name));
+    }
+    //显示收藏fragment
+    private void showBookFragment(){
+        FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
+        transaction.show(bookmarkFragment);
+        transaction.hide(mainFragment);
+        transaction.commit();
+
+        toolbar.setTitle(getResources().getString(R.string.nav_bookmarks));
+        if(bookmarkFragment.isAdded()){
+            bookmarkFragment.notifyDataChanged();
+        }
+
+    }
+
+    private void getBackFragment(Bundle savedInstanceState){
+        if (savedInstanceState!=null){
+            mainFragment=(MainFragment)getSupportFragmentManager().getFragment(savedInstanceState,"mainFragment");
+            bookmarkFragment= (BookmarkFragment) getSupportFragmentManager().getFragment(savedInstanceState,"bookmarkFragment");
+        }else {
+            mainFragment=MainFragment.newInstance();
+            bookmarkFragment=BookmarkFragment.newInstance();
+
+        }
+    }
+
 
     @Override
     public void onBackPressed() {
@@ -81,6 +132,7 @@ public class FirstActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+        drawer.closeDrawer(GravityCompat.START);
 
         if (id == R.id.nav_camera) {
             // Handle the camera action
