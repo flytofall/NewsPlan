@@ -2,6 +2,7 @@ package com.xprinter.newsplan.homepage;
 
 import com.xprinter.newsplan.BasePresenter;
 import com.xprinter.newsplan.BaseView;
+import com.xprinter.newsplan.bean.ZhihuDailyNews;
 
 import java.util.ArrayList;
 
@@ -17,9 +18,11 @@ public interface ZhihuDailyContract {
         //显示正在加载
         void showLoading();
         //成功获取数据后在界面显示
-//        void showResults(ArrayList<ZhihuDailyNews.Question> list);// TODO: ZhihuDailyNews.Question 2017/3/10
+        void showResults(ArrayList<ZhihuDailyNews.Question> list);
         // 显示用于加载指定日期的date picker dialog
         void showPickDialog();
+        //停止加载
+        void stopLoading();
 
 
     }

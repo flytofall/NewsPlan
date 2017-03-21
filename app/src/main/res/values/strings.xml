@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">纸飞机</string>
+    <string name="app_name">News飞机</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -96,4 +96,6 @@
 
     <string name="network_error">网络走丢了…点击重试</string>
     <string name="refresh">刷新</string>
+    <string name="save_tosql_erre">保存到sql数据出错</string>
+    <string name="please_check_network">请检查下网络</string>
 </resources>

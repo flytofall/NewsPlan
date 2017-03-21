@@ -1,11 +1,10 @@
 package com.xprinter.newsplan.homepage;
 
-import android.app.Fragment;
+import android.app.ActivityManager;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.os.PersistableBundle;
 import android.support.v4.app.FragmentTransaction;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -17,6 +16,8 @@ import android.view.MenuItem;
 
 import com.xprinter.newsplan.R;
 import com.xprinter.newsplan.bookmarks.BookmarkFragment;
+import com.xprinter.newsplan.bookmarks.BookmarkPresenter;
+import com.xprinter.newsplan.service.CacheService;
 
 public class FirstActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -36,13 +37,27 @@ public class FirstActivity extends AppCompatActivity
         setContentView(R.layout.activity_first);
 
         //初始化view、
-        initView();
+        initViews();
+
+        //回复fragment的状态
+        getBackFragment(savedInstanceState);
+
+        //实例化boormarkprenter
+        new BookmarkPresenter();//todo:这个类还没有写
+
+        //默认显示首页内容
+        showMainFragment();
+
+        //启动服务
+        startService(new Intent(this, CacheService.class));
+
+
 
 
 
     }
 
-    private void initView(){
+    private void initViews(){
         toolbar= (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -92,6 +107,14 @@ public class FirstActivity extends AppCompatActivity
             bookmarkFragment=BookmarkFragment.newInstance();
 
         }
+        if (!mainFragment.isAdded()){
+            getSupportFragmentManager().beginTransaction().add(R.id.layout_fragment,mainFragment,"mainFragment")
+                    .commit();
+        }
+        if (!bookmarkFragment.isAdded()){
+            getSupportFragmentManager().beginTransaction().add(R.id.layout_fragment,bookmarkFragment,"bookmarkFragment")
+                    .commit();
+        }
     }
 
 
@@ -134,22 +157,45 @@ public class FirstActivity extends AppCompatActivity
         int id = item.getItemId();
         drawer.closeDrawer(GravityCompat.START);
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        if (id == R.id.nav_home) {
+            showMainFragment();
+        } else if (id == R.id.nav_bookmarks) {
+            showBookFragment();
 
-        } else if (id == R.id.nav_slideshow) {
+        } else if (id == R.id.nav_change_theme) {
+            //改变主题
 
-        } else if (id == R.id.nav_manage) {
+        } else if (id == R.id.nav_settings) {
+            //设置
 
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
+        } else if (id == R.id.nav_about) {
+            //关于
 
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        ActivityManager manager= (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service:manager.getRunningServices(Integer.MAX_VALUE)){
+            if (CacheService.class.getName().equals(service.service.getClassName())){
+                stopService(new Intent(this,CacheService.class));
+            }
+        }
+        super.onDestroy();
+    }
+
+    //退出时保存状态
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+        if(mainFragment.isAdded()){
+            getSupportFragmentManager().putFragment(outState,"mainFragment",mainFragment);
+        }
+        if (bookmarkFragment.isAdded()){
+            getSupportFragmentManager().putFragment(outState,"bookmarkFragment",bookmarkFragment);
+        }
     }
 }
